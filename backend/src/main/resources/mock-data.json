@@ -1,0 +1,144 @@
+{
+  "users": [
+    {
+      "id": "292d3f0e-8087-43e0-86e0-6b7cbe3a0c86",
+      "email": "ihernandez@email.com",
+      "password": "Isabel2024!",
+      "full_name": "Isabel Hernández Álvarez",
+      "created_at": "2023-07-05T01:10:34Z"
+    },
+    {
+      "id": "2da49f44-0707-46d6-89a0-ea258ec244ed",
+      "email": "mjimenez@example.com",
+      "password": "Miguel2024!",
+      "full_name": "Miguel Jiménez Molina",
+      "created_at": "2023-09-17T07:54:07Z"
+    },
+    {
+      "id": "d12f6554-2c5e-4b07-afb1-be56ce7453aa",
+      "email": "paulamolina@mail.com",
+      "password": "Paula2024!",
+      "full_name": "Paula Molina Ruiz",
+      "created_at": "2023-10-28T10:09:27Z"
+    },
+    {
+      "id": "8d31d881-5d0a-4552-9849-722c64fd41d6",
+      "email": "mperez@email.com",
+      "password": "Miguel2024!",
+      "full_name": "Miguel Pérez Rubio",
+      "created_at": "2024-02-11T23:00:01Z"
+    },
+    {
+      "id": "02cfedc7-0677-40a1-955e-53cfef7d7f8f",
+      "email": "flopez@example.com",
+      "password": "Francisco2024!",
+      "full_name": "Francisco López Delgado",
+      "created_at": "2023-08-24T22:42:06Z"
+    },
+    {
+      "id": "92cd4355-f90c-4050-b4ab-0f0ff1a7170a",
+      "email": "albertoramirez@email.com",
+      "password": "Alberto2024!",
+      "full_name": "Alberto Ramírez Morales",
+      "created_at": "2023-09-27T14:05:12Z"
+    },
+    {
+      "id": "85ddc337-04db-4cef-a885-600ae8f58e2b",
+      "email": "acastro@example.com",
+      "password": "Ana2024!",
+      "full_name": "Ana Castro Nuñez",
+      "created_at": "2023-11-15T06:15:03Z"
+    },
+    {
+      "id": "e4bd890f-ec8e-4531-aa0e-0bed00cce9c0",
+      "email": "antonio.lopez489@test.com",
+      "password": "Antonio2024!",
+      "full_name": "Antonio López Vázquez",
+      "created_at": "2023-08-10T21:25:43Z"
+    },
+    {
+      "id": "5460ed65-1124-4c70-a0cf-c658d3696d9a",
+      "email": "miguel.perez@email.com",
+      "password": "Miguel2024!",
+      "full_name": "Miguel Pérez Marín",
+      "created_at": "2024-04-06T10:31:30Z"
+    },
+    {
+      "id": "e9f5473b-801a-4930-8084-25cad7035197",
+      "email": "slopez@email.com",
+      "password": "Silvia2024!",
+      "full_name": "Silvia López Jiménez",
+      "created_at": "2024-07-17T20:40:28Z"
+    },
+    {
+      "id": "46722e0a-e91f-461d-983b-97fc8c08186f",
+      "email": "jesus.marin@example.com",
+      "password": "Jesús2024!",
+      "full_name": "Jesús Marín Muñoz",
+      "created_at": "2023-03-15T20:38:30Z"
+    },
+    {
+      "id": "029bc4ea-855d-4b4b-b6fa-305847bfdef7",
+      "email": "fernandogonzalez@email.com",
+      "password": "Fernando2024!",
+      "full_name": "Fernando González Ramírez",
+      "created_at": "2023-09-02T03:21:03Z"
+    },
+    {
+      "id": "1dbeab80-d7b4-4300-b54c-d24e76b3ea40",
+      "email": "anagil@mail.com",
+      "password": "Ana2024!",
+      "full_name": "Ana Gil Gómez",
+      "created_at": "2023-12-06T13:35:49Z"
+    },
+    {
+      "id": "7ac05b88-7eb5-4b85-8b3e-701c4799ff31",
+      "email": "ricardo.diaz413@example.com",
+      "password": "Ricardo2024!",
+      "full_name": "Ricardo Díaz Alonso",
+      "created_at": "2023-10-17T09:11:07Z"
+    },
+    {
+      "id": "cc68f868-564d-4503-9632-9270c577f3e5",
+      "email": "cristina.munoz816@example.com",
+      "password": "Cristina2024!",
+      "full_name": "Cristina Muñoz Sanz",
+      "created_at": "2023-08-01T23:26:45Z"
+    },
+    {
+      "id": "21240669-0ac7-42a6-aeb7-b07239ffb6fa",
+      "email": "falonso@example.com",
+      "password": "Fernando2024!",
+      "full_name": "Fernando Alonso Vázquez",
+      "created_at": "2024-09-24T10:19:34Z"
+    },
+    {
+      "id": "537e4bfc-19a7-46b2-a7fd-4406c569dae9",
+      "email": "mariadelgado@email.com",
+      "password": "María2024!",
+      "full_name": "María Delgado Pérez",
+      "created_at": "2024-08-30T15:30:27Z"
+    },
+    {
+      "id": "62003907-b92e-428f-9894-97bd308770ca",
+      "email": "carmen.ramirez904@example.com",
+      "password": "Carmen2024!",
+      "full_name": "Carmen Ramírez Pérez",
+      "created_at": "2023-03-16T21:13:55Z"
+    },
+    {
+      "id": "b19fe128-537a-4e50-99f6-9038bd91b4f8",
+      "email": "danielalonso@email.com",
+      "password": "Daniel2024!",
+      "full_name": "Daniel Alonso Ortiz",
+      "created_at": "2023-07-19T12:34:12Z"
+    },
+    {
+      "id": "9cd56420-26d3-421e-ab53-32eccbc5b20d",
+      "email": "lmartinez@inbox.com",
+      "password": "Laura2024!",
+      "full_name": "Laura Martínez Iglesias",
+      "created_at": "2024-01-11T17:16:46Z"
+    }
+  ]
+}
