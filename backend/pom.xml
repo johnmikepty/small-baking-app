@@ -14,7 +14,7 @@
     <groupId>com.smallbankapp</groupId>
     <artifactId>banking</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>banking</name>
+    <n>banking</n>
     <description>Online Banking System — Technical Interview</description>
 
     <properties>
@@ -153,6 +153,13 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>kafka</artifactId>
             <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- ===== Awaitility (integration tests) ===== -->
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.2.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
