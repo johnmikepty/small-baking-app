@@ -17,10 +17,16 @@ public class JwtService {
 
     private final JwtProperties properties;
 
-    public String generateToken(UUID userId, String email) {
+    /**
+     * Generates a JWT with userId as subject plus email and accountId claims.
+     * The accountId claim allows the Angular frontend to resolve the account
+     * without an extra API call on every page load.
+     */
+    public String generateToken(UUID userId, String email, UUID accountId) {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("email", email)
+                .claim("accountId", accountId.toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + properties.expirationMs()))
                 .signWith(signingKey())
@@ -33,6 +39,10 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return parseClaims(token).get("email", String.class);
+    }
+
+    public String extractAccountId(String token) {
+        return parseClaims(token).get("accountId", String.class);
     }
 
     public boolean isTokenValid(String token) {
