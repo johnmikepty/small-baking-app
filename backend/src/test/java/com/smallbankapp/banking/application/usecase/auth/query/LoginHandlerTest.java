@@ -1,8 +1,14 @@
 package com.smallbankapp.banking.application.usecase.auth.query;
 
+import com.smallbankapp.banking.application.port.out.AccountRepository;
 import com.smallbankapp.banking.application.port.out.UserRepository;
 import com.smallbankapp.banking.domain.exception.InvalidCredentialsException;
+import com.smallbankapp.banking.domain.model.Account;
 import com.smallbankapp.banking.domain.model.User;
+import com.smallbankapp.banking.domain.valueobject.AccountNumber;
+import com.smallbankapp.banking.domain.valueobject.AccountStatus;
+import com.smallbankapp.banking.domain.valueobject.AccountType;
+import com.smallbankapp.banking.domain.valueobject.Money;
 import com.smallbankapp.banking.infrastructure.security.jwt.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +29,14 @@ import static org.mockito.Mockito.*;
 class LoginHandlerTest {
 
     @Mock UserRepository userRepository;
+    @Mock AccountRepository accountRepository;
     @Mock PasswordEncoder passwordEncoder;
     @Mock JwtService jwtService;
 
     @InjectMocks LoginHandler handler;
 
     private User mockUser;
+    private Account mockAccount;
     private LoginQuery query;
 
     @BeforeEach
@@ -41,6 +49,16 @@ class LoginHandlerTest {
                 Instant.now(),
                 Instant.now()
         );
+        mockAccount = new Account(
+                UUID.randomUUID(),
+                mockUser.getId(),
+                AccountNumber.of("1234567890"),
+                AccountType.SAVINGS,
+                Money.of(0.0, "USD"),
+                AccountStatus.ACTIVE,
+                Instant.now(),
+                Instant.now()
+        );
         query = new LoginQuery("test@email.com", "Password1!");
     }
 
@@ -48,7 +66,9 @@ class LoginHandlerTest {
     void handle_validCredentials_returnsTokenAndUserInfo() {
         when(userRepository.findByEmail(query.email())).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches(query.password(), mockUser.getPasswordHash())).thenReturn(true);
-        when(jwtService.generateToken(mockUser.getId(), mockUser.getEmail())).thenReturn("jwt-token");
+        when(accountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockAccount));
+        when(jwtService.generateToken(mockUser.getId(), mockUser.getEmail(), mockAccount.getId()))
+                .thenReturn("jwt-token");
 
         LoginResult result = handler.handle(query);
 
@@ -64,7 +84,7 @@ class LoginHandlerTest {
         assertThatThrownBy(() -> handler.handle(query))
                 .isInstanceOf(InvalidCredentialsException.class);
 
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any(), any(), any());
     }
 
     @Test
@@ -75,6 +95,18 @@ class LoginHandlerTest {
         assertThatThrownBy(() -> handler.handle(query))
                 .isInstanceOf(InvalidCredentialsException.class);
 
-        verify(jwtService, never()).generateToken(any(), any());
+        verify(jwtService, never()).generateToken(any(), any(), any());
+    }
+
+    @Test
+    void handle_accountNotFound_throwsInvalidCredentialsException() {
+        when(userRepository.findByEmail(query.email())).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches(query.password(), mockUser.getPasswordHash())).thenReturn(true);
+        when(accountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> handler.handle(query))
+                .isInstanceOf(InvalidCredentialsException.class);
+
+        verify(jwtService, never()).generateToken(any(), any(), any());
     }
 }
