@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface TransactionHistoryMongoRepository extends MongoRepository<TransactionHistoryDocument, String> {
     Page<TransactionHistoryDocument> findByAccountIdOrderByCreatedAtDesc(UUID accountId, Pageable pageable);
+    boolean existsByTransactionId(UUID transactionId);
 }
