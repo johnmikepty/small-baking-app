@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
@@ -26,5 +26,5 @@ import { AuthService } from './core/services/auth.service';
   `,
 })
 export class AppComponent {
-  constructor(public auth: AuthService) {}
+  protected auth = inject(AuthService);
 }
