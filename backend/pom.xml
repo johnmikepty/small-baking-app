@@ -14,7 +14,7 @@
     <groupId>com.smallbankapp</groupId>
     <artifactId>banking</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <n>banking</n>
+    <name>banking</name>
     <description>Online Banking System — Technical Interview</description>
 
     <properties>
@@ -94,6 +94,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+            <version>10.12.0</version>
         </dependency>
 
         <!-- ===== MongoDB ===== -->
@@ -116,12 +117,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
-        </dependency>
-
-        <!-- ===== Jackson for AWS SDK ===== -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- ===== Rate Limiting (Bucket4j) ===== -->
