@@ -1,7 +1,6 @@
 package com.smallbankapp.banking.infrastructure.messaging.kafka;
 
 import com.smallbankapp.banking.infrastructure.messaging.kafka.event.TransactionEvent;
-import com.smallbankapp.banking.infrastructure.messaging.kafka.producer.KafkaTransactionProducer;
 import com.smallbankapp.banking.infrastructure.persistence.mongo.repository.AuditLogMongoRepository;
 import com.smallbankapp.banking.infrastructure.persistence.mongo.repository.TransactionHistoryMongoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +33,8 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @Testcontainers
 class KafkaMessagingIntegrationTest {
+
+    private static final String TOPIC = "banking.transactions";
 
     // ── Containers ────────────────────────────────────────────────────────────
 
@@ -88,22 +89,15 @@ class KafkaMessagingIntegrationTest {
         UUID accountId = UUID.randomUUID();
 
         TransactionEvent event = TransactionEvent.of(
-                transactionId,
-                null,
-                accountId,
-                "DEPOSIT",
-                BigDecimal.valueOf(200.00),
-                "USD",
-                "COMPLETED",
-                Instant.now()
+                transactionId, null, accountId,
+                "DEPOSIT", BigDecimal.valueOf(200.00), "USD", "COMPLETED", Instant.now()
         );
 
-        kafkaTemplate.send(KafkaTransactionProducer.TOPIC, accountId.toString(), event);
+        kafkaTemplate.send(TOPIC, accountId.toString(), event);
 
         await().atMost(15, TimeUnit.SECONDS)
                 .untilAsserted(() ->
-                        assertThat(auditLogMongoRepository.existsByTransactionId(transactionId))
-                                .isTrue()
+                        assertThat(auditLogMongoRepository.existsByTransactionId(transactionId)).isTrue()
                 );
     }
 
@@ -113,22 +107,15 @@ class KafkaMessagingIntegrationTest {
         UUID accountId = UUID.randomUUID();
 
         TransactionEvent event = TransactionEvent.of(
-                transactionId,
-                null,
-                accountId,
-                "DEPOSIT",
-                BigDecimal.valueOf(150.00),
-                "USD",
-                "COMPLETED",
-                Instant.now()
+                transactionId, null, accountId,
+                "DEPOSIT", BigDecimal.valueOf(150.00), "USD", "COMPLETED", Instant.now()
         );
 
-        kafkaTemplate.send(KafkaTransactionProducer.TOPIC, accountId.toString(), event);
+        kafkaTemplate.send(TOPIC, accountId.toString(), event);
 
         await().atMost(15, TimeUnit.SECONDS)
                 .untilAsserted(() ->
-                        assertThat(transactionHistoryMongoRepository.existsByTransactionId(transactionId))
-                                .isTrue()
+                        assertThat(transactionHistoryMongoRepository.existsByTransactionId(transactionId)).isTrue()
                 );
     }
 
@@ -139,17 +126,11 @@ class KafkaMessagingIntegrationTest {
         UUID targetId = UUID.randomUUID();
 
         TransactionEvent event = TransactionEvent.of(
-                transactionId,
-                sourceId,
-                targetId,
-                "TRANSFER",
-                BigDecimal.valueOf(500.00),
-                "USD",
-                "COMPLETED",
-                Instant.now()
+                transactionId, sourceId, targetId,
+                "TRANSFER", BigDecimal.valueOf(500.00), "USD", "COMPLETED", Instant.now()
         );
 
-        kafkaTemplate.send(KafkaTransactionProducer.TOPIC, sourceId.toString(), event);
+        kafkaTemplate.send(TOPIC, sourceId.toString(), event);
 
         await().atMost(15, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
@@ -164,27 +145,16 @@ class KafkaMessagingIntegrationTest {
         UUID accountId = UUID.randomUUID();
 
         TransactionEvent event = TransactionEvent.of(
-                transactionId,
-                accountId,
-                null,
-                "WITHDRAWAL",
-                BigDecimal.valueOf(75.00),
-                "USD",
-                "COMPLETED",
-                Instant.now()
+                transactionId, accountId, null,
+                "WITHDRAWAL", BigDecimal.valueOf(75.00), "USD", "COMPLETED", Instant.now()
         );
 
-        // Publish the same event twice
-        kafkaTemplate.send(KafkaTransactionProducer.TOPIC, accountId.toString(), event);
-        kafkaTemplate.send(KafkaTransactionProducer.TOPIC, accountId.toString(), event);
+        kafkaTemplate.send(TOPIC, accountId.toString(), event);
+        kafkaTemplate.send(TOPIC, accountId.toString(), event);
 
-        // Wait for consumers to process
         TimeUnit.SECONDS.sleep(10);
 
-        // Exactly 1 audit log entry and 1 history entry must exist
-        assertThat(auditLogMongoRepository
-                .findByTransactionId(transactionId)).isPresent();
-        assertThat(transactionHistoryMongoRepository
-                .existsByTransactionId(transactionId)).isTrue();
+        assertThat(auditLogMongoRepository.findByTransactionId(transactionId)).isPresent();
+        assertThat(transactionHistoryMongoRepository.existsByTransactionId(transactionId)).isTrue();
     }
 }

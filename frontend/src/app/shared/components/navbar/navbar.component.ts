@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -32,5 +32,5 @@ import { AuthService } from '../../core/services/auth.service';
   `,
 })
 export class NavbarComponent {
-  constructor(public auth: AuthService) {}
+  protected auth = inject(AuthService);
 }

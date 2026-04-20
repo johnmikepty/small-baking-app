@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,7 +14,6 @@ import { Transaction, TransactionHistoryResponse } from '../../models/transactio
         <h2 class="text-2xl font-bold text-gray-800">Transaction History</h2>
         <span class="text-sm text-gray-500">{{ totalElements() }} total records</span>
       </div>
-
       @if (loading()) {
         <div class="card flex items-center justify-center h-40">
           <p class="text-gray-400">Loading history...</p>
@@ -38,53 +37,31 @@ import { Transaction, TransactionHistoryResponse } from '../../models/transactio
             <tbody class="divide-y divide-gray-100">
               @for (tx of transactions(); track tx.transactionId) {
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 text-gray-500 font-mono text-xs">
-                    {{ tx.transactionId | slice:0:8 }}...
-                  </td>
-                  <td class="px-6 py-4">
-                    <span [class]="typeBadge(tx.type)">{{ tx.type }}</span>
-                  </td>
+                  <td class="px-6 py-4 text-gray-500 font-mono text-xs">{{ tx.transactionId | slice:0:8 }}...</td>
+                  <td class="px-6 py-4"><span [class]="typeBadge(tx.type)">{{ tx.type }}</span></td>
                   <td class="px-6 py-4 text-right font-semibold"
                       [class]="tx.type === 'DEPOSIT' ? 'text-primary' : 'text-danger'">
                     {{ tx.type === 'DEPOSIT' ? '+' : '-' }}{{ tx.amount | number:'1.2-2' }}
                     <span class="text-gray-400 font-normal text-xs">{{ tx.currency }}</span>
                   </td>
-                  <td class="px-6 py-4">
-                    <span class="badge-success">{{ tx.status }}</span>
-                  </td>
-                  <td class="px-6 py-4 text-gray-500">
-                    {{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}
-                  </td>
+                  <td class="px-6 py-4"><span class="badge-success">{{ tx.status }}</span></td>
+                  <td class="px-6 py-4 text-gray-500">{{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="px-6 py-12 text-center text-gray-400">
-                    No transactions found.
-                  </td>
+                  <td colspan="5" class="px-6 py-12 text-center text-gray-400">No transactions found.</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-
-        <!-- Pagination -->
         @if (totalPages() > 1) {
           <div class="flex items-center justify-between mt-4">
-            <button
-              (click)="changePage(currentPage() - 1)"
-              [disabled]="currentPage() === 0"
-              class="btn-outline text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-              ← Previous
-            </button>
-            <span class="text-sm text-gray-500">
-              Page {{ currentPage() + 1 }} of {{ totalPages() }}
-            </span>
-            <button
-              (click)="changePage(currentPage() + 1)"
-              [disabled]="currentPage() >= totalPages() - 1"
-              class="btn-outline text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-              Next →
-            </button>
+            <button (click)="changePage(currentPage() - 1)" [disabled]="currentPage() === 0"
+              class="btn-outline text-sm disabled:opacity-40 disabled:cursor-not-allowed">← Previous</button>
+            <span class="text-sm text-gray-500">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+            <button (click)="changePage(currentPage() + 1)" [disabled]="currentPage() >= totalPages() - 1"
+              class="btn-outline text-sm disabled:opacity-40 disabled:cursor-not-allowed">Next →</button>
           </div>
         }
       }
@@ -92,6 +69,9 @@ import { Transaction, TransactionHistoryResponse } from '../../models/transactio
   `,
 })
 export class HistoryComponent implements OnInit {
+  private txService = inject(TransactionService);
+  private auth      = inject(AuthService);
+
   transactions  = signal<Transaction[]>([]);
   loading       = signal(true);
   errorMsg      = signal('');
@@ -99,25 +79,16 @@ export class HistoryComponent implements OnInit {
   totalPages    = signal(0);
   totalElements = signal(0);
 
-  constructor(
-    private txService: TransactionService,
-    private auth: AuthService
-  ) {}
-
-  ngOnInit() {
-    this.loadHistory();
-  }
+  ngOnInit() { this.loadHistory(); }
 
   loadHistory(page = 0) {
     this.loading.set(true);
     const accountId = this.getAccountIdFromToken();
-
     if (!accountId) {
       this.errorMsg.set('Could not determine account. Please log in again.');
       this.loading.set(false);
       return;
     }
-
     this.txService.getHistory(accountId, page).subscribe({
       next: (res: TransactionHistoryResponse) => {
         this.transactions.set(res.content);
@@ -133,12 +104,10 @@ export class HistoryComponent implements OnInit {
     });
   }
 
-  changePage(page: number) {
-    this.loadHistory(page);
-  }
+  changePage(page: number) { this.loadHistory(page); }
 
   typeBadge(type: string): string {
-    if (type === 'DEPOSIT')   return 'badge-success';
+    if (type === 'DEPOSIT')    return 'badge-success';
     if (type === 'WITHDRAWAL') return 'badge-danger';
     return 'badge-neutral';
   }
@@ -149,8 +118,6 @@ export class HistoryComponent implements OnInit {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.accountId ?? null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
 }
