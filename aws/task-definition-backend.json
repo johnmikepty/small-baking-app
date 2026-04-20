@@ -16,9 +16,9 @@
         }
       ],
       "environment": [
-        { "name": "SPRING_PROFILES_ACTIVE", "value": "docker" },
+        { "name": "SPRING_PROFILES_ACTIVE", "value": "aws" },
         { "name": "DB_USER",                "value": "banking" },
-        { "name": "KAFKA_BROKERS",           "value": "localhost:9092" }
+        { "name": "AWS_REGION",             "value": "us-east-2" }
       ],
       "secrets": [
         {
