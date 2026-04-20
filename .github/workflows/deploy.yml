@@ -1,0 +1,103 @@
+name: CD — Deploy to AWS
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
+
+jobs:
+  deploy:
+    name: Build & Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    env:
+      AWS_REGION:               us-east-2
+      ECR_BACKEND:              721717798149.dkr.ecr.us-east-2.amazonaws.com/smallbank-backend
+      ECR_FRONTEND:             721717798149.dkr.ecr.us-east-2.amazonaws.com/smallbank-frontend
+      ECS_CLUSTER:              smallbank-cluster
+      ECS_SERVICE_BACKEND:      smallbank-backend-service
+      ECS_SERVICE_FRONTEND:     smallbank-frontend-service
+      TASK_DEFINITION_BACKEND:  aws/task-definition-backend.json
+      TASK_DEFINITION_FRONTEND: aws/task-definition-frontend.json
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── AWS Credentials ─────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      # ── ECR Login ───────────────────────────────────────────
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── Build & Push Backend ─────────────────────────────────
+      - name: Build and push backend image
+        working-directory: backend
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t $ECR_BACKEND:$IMAGE_TAG -t $ECR_BACKEND:latest .
+          docker push $ECR_BACKEND:$IMAGE_TAG
+          docker push $ECR_BACKEND:latest
+          echo "BACKEND_IMAGE=$ECR_BACKEND:$IMAGE_TAG" >> $GITHUB_ENV
+
+      # ── Build & Push Frontend ────────────────────────────────
+      - name: Build and push frontend image
+        working-directory: frontend
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t $ECR_FRONTEND:$IMAGE_TAG -t $ECR_FRONTEND:latest .
+          docker push $ECR_FRONTEND:$IMAGE_TAG
+          docker push $ECR_FRONTEND:latest
+          echo "FRONTEND_IMAGE=$ECR_FRONTEND:$IMAGE_TAG" >> $GITHUB_ENV
+
+      # ── Update Task Definitions with new image ───────────────
+      - name: Update backend task definition
+        id: task-def-backend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION_BACKEND }}
+          container-name:  smallbank-backend
+          image:           ${{ env.BACKEND_IMAGE }}
+
+      - name: Update frontend task definition
+        id: task-def-frontend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION_FRONTEND }}
+          container-name:  smallbank-frontend
+          image:           ${{ env.FRONTEND_IMAGE }}
+
+      # ── Deploy to ECS ────────────────────────────────────────
+      - name: Deploy backend to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-backend.outputs.task-definition }}
+          service:         ${{ env.ECS_SERVICE_BACKEND }}
+          cluster:         ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Deploy frontend to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
+          service:         ${{ env.ECS_SERVICE_FRONTEND }}
+          cluster:         ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # ── Summary ──────────────────────────────────────────────
+      - name: Deployment summary
+        run: |
+          echo "✅ Backend deployed:  $BACKEND_IMAGE"
+          echo "✅ Frontend deployed: $FRONTEND_IMAGE"
+          echo "🌐 Cluster: $ECS_CLUSTER"
+          echo "🌐 Region:  $AWS_REGION"

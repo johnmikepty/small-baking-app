@@ -51,6 +51,14 @@ spring:
       properties:
         spring.json.trusted.packages: "com.smallbankapp.banking.*"
 
+# ── SQS (default disabled — enabled via profile) ─────────────
+sqs:
+  endpoint:    ""
+  region:      ${AWS_REGION:us-east-2}
+  access-key:  ${AWS_ACCESS_KEY_ID:test}
+  secret-key:  ${AWS_SECRET_ACCESS_KEY:test}
+  queue-url:   ""
+
 # ── JWT ─────────────────────────────────────────────────────
 jwt:
   secret: ${JWT_SECRET:change-me-in-production-min-32-chars!!}
@@ -76,3 +84,33 @@ management:
     web:
       exposure:
         include: health,info
+
+---
+# ── Profile: localstack ──────────────────────────────────────
+# Use this profile to test SQS against LocalStack on Proxmox
+# Start with: SPRING_PROFILES_ACTIVE=localstack
+spring:
+  config:
+    activate:
+      on-profile: localstack
+
+sqs:
+  endpoint:  http://192.168.1.145:4566
+  region:    us-east-1
+  access-key: test
+  secret-key: test
+  queue-url: http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/banking-transactions
+
+---
+# ── Profile: aws ─────────────────────────────────────────────
+# Production profile — uses AWS real services
+# Credentials come from ECS IAM task role (no keys needed)
+spring:
+  config:
+    activate:
+      on-profile: aws
+
+sqs:
+  endpoint:  ""
+  region:    us-east-2
+  queue-url: https://sqs.us-east-2.amazonaws.com/721717798149/banking-transactions

@@ -1,0 +1,52 @@
+{
+  "family": "smallbank-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::721717798149:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "smallbank-backend",
+      "image": "721717798149.dkr.ecr.us-east-2.amazonaws.com/smallbank-backend:latest",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "SPRING_PROFILES_ACTIVE", "value": "docker" },
+        { "name": "DB_USER",                "value": "banking" },
+        { "name": "KAFKA_BROKERS",           "value": "localhost:9092" }
+      ],
+      "secrets": [
+        {
+          "name": "DB_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:721717798149:parameter/smallbank/DB_URL"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:ssm:us-east-2:721717798149:parameter/smallbank/DB_PASSWORD"
+        },
+        {
+          "name": "MONGO_URI",
+          "valueFrom": "arn:aws:ssm:us-east-2:721717798149:parameter/smallbank/MONGO_URI"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:721717798149:parameter/smallbank/JWT_SECRET"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group":         "/ecs/smallbank-backend",
+          "awslogs-region":        "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "essential": true
+    }
+  ]
+}

@@ -22,7 +22,20 @@
         <jjwt.version>0.12.5</jjwt.version>
         <testcontainers.version>1.19.8</testcontainers.version>
         <bucket4j.version>8.10.1</bucket4j.version>
+        <aws.sdk.version>2.25.60</aws.sdk.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- ===== Web ===== -->
@@ -95,6 +108,22 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <!-- ===== AWS SDK — SQS ===== -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
+        </dependency>
+
+        <!-- ===== Jackson for AWS SDK ===== -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
         <!-- ===== Rate Limiting (Bucket4j) ===== -->
         <dependency>
             <groupId>com.bucket4j</groupId>
@@ -163,7 +192,6 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- ===== Awaitility (integration tests) ===== -->
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
