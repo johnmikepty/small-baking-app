@@ -5,6 +5,7 @@ import com.smallbankapp.banking.infrastructure.persistence.mongo.document.AuditL
 import com.smallbankapp.banking.infrastructure.persistence.mongo.repository.AuditLogMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
@@ -14,14 +15,13 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 
 /**
- * Consumes TransactionEvents from "banking.transactions" and persists
- * an immutable audit log entry to MongoDB.
- *
- * Retry strategy: 3 attempts with exponential backoff, then DLT.
- * Idempotent: skips if the transactionId already exists in audit_logs.
+ * Kafka consumer for audit logs.
+ * Active on profiles: dev, docker, test.
+ * On aws/localstack profiles, SqsAuditLogConsumer takes over.
  */
 @Slf4j
 @Component
+@Profile({"dev", "docker", "test"})
 @RequiredArgsConstructor
 public class AuditLogConsumer {
 
@@ -42,7 +42,6 @@ public class AuditLogConsumer {
     public void consume(TransactionEvent event) {
         log.debug("AuditLogConsumer received event [transactionId={}]", event.transactionId());
 
-        // Idempotency guard
         if (auditLogMongoRepository.existsByTransactionId(event.transactionId())) {
             log.info("Duplicate audit event skipped [transactionId={}]", event.transactionId());
             return;

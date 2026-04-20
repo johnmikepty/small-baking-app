@@ -1,0 +1,29 @@
+{
+  "family": "smallbank-frontend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::721717798149:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "smallbank-frontend",
+      "image": "721717798149.dkr.ecr.us-east-2.amazonaws.com/smallbank-frontend:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group":         "/ecs/smallbank-frontend",
+          "awslogs-region":        "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "essential": true
+    }
+  ]
+}

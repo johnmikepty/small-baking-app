@@ -5,6 +5,7 @@ import com.smallbankapp.banking.domain.model.Transaction;
 import com.smallbankapp.banking.infrastructure.messaging.kafka.event.TransactionEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,12 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Kafka adapter that implements the TransactionEventPublisher domain port.
- * Publishes TransactionEvent to the "banking.transactions" topic.
- * Spring Kafka auto-configures the dead-letter topic on deserialization failure.
+ * Active on profiles: dev, docker, test.
+ * On aws/localstack profiles, SqsTransactionProducer takes over.
  */
 @Slf4j
 @Component
+@Profile({"dev", "docker", "test"})
 @RequiredArgsConstructor
 public class KafkaTransactionProducer implements TransactionEventPublisher {
 
@@ -38,7 +40,6 @@ public class KafkaTransactionProducer implements TransactionEventPublisher {
                 transaction.getCreatedAt()
         );
 
-        // Partition key: accountId (source or target) for ordering per account
         String key = resolveKey(transaction);
 
         CompletableFuture<SendResult<String, TransactionEvent>> future =

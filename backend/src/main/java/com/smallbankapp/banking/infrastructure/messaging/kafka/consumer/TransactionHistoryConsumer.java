@@ -5,6 +5,7 @@ import com.smallbankapp.banking.infrastructure.persistence.mongo.document.Transa
 import com.smallbankapp.banking.infrastructure.persistence.mongo.repository.TransactionHistoryMongoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.TopicSuffixingStrategy;
@@ -14,13 +15,13 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 /**
- * Consumes TransactionEvents and persists a denormalized history record
- * to MongoDB (transaction_history collection) for fast read-side queries.
- *
- * Idempotent: skips duplicate transactionIds.
+ * Kafka consumer for transaction history.
+ * Active on profiles: dev, docker, test.
+ * On aws/localstack profiles, SqsAuditLogConsumer takes over.
  */
 @Slf4j
 @Component
+@Profile({"dev", "docker", "test"})
 @RequiredArgsConstructor
 public class TransactionHistoryConsumer {
 
@@ -41,19 +42,16 @@ public class TransactionHistoryConsumer {
     public void consume(TransactionEvent event) {
         log.debug("TransactionHistoryConsumer received event [transactionId={}]", event.transactionId());
 
-        // Idempotency guard
         if (transactionHistoryMongoRepository.existsByTransactionId(event.transactionId())) {
             log.info("Duplicate history event skipped [transactionId={}]", event.transactionId());
             return;
         }
 
         UUID primaryAccountId = event.sourceAccountId() != null
-                ? event.sourceAccountId()
-                : event.targetAccountId();
+                ? event.sourceAccountId() : event.targetAccountId();
 
         UUID counterpart = (event.sourceAccountId() != null && event.targetAccountId() != null)
-                ? event.targetAccountId()
-                : null;
+                ? event.targetAccountId() : null;
 
         TransactionHistoryDocument doc = TransactionHistoryDocument.builder()
                 .transactionId(event.transactionId())
@@ -62,7 +60,7 @@ public class TransactionHistoryConsumer {
                 .transactionType(event.type())
                 .amount(event.amount())
                 .currency(event.currency())
-                .description(null) // description lives in SQL only
+                .description(null)
                 .status(event.status())
                 .createdAt(event.timestamp())
                 .build();
