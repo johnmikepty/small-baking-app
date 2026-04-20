@@ -9,6 +9,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
@@ -20,16 +21,15 @@ import java.util.Map;
 
 /**
  * Kafka infrastructure configuration.
- * Topics, producer/consumer factories, and listener container factory.
- * Dead-letter topic (DLT) is handled automatically by @RetryableTopic on the consumer.
+ * Active on profiles: dev, docker, test.
+ * On aws/localstack profiles, SQS takes over.
  */
 @Configuration
+@Profile({"dev", "docker", "test"})
 public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
-    // ── Topics ───────────────────────────────────────────────────────────────
 
     @Bean
     public NewTopic transactionsTopic() {
@@ -47,8 +47,6 @@ public class KafkaConfig {
                 .build();
     }
 
-    // ── Producer ─────────────────────────────────────────────────────────────
-
     @Bean
     public ProducerFactory<String, TransactionEvent> producerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -65,8 +63,6 @@ public class KafkaConfig {
     public KafkaTemplate<String, TransactionEvent> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-
-    // ── Consumer ─────────────────────────────────────────────────────────────
 
     @Bean
     public ConsumerFactory<String, TransactionEvent> consumerFactory() {
